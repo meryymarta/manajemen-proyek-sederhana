@@ -1,151 +1,237 @@
-/* public/css/style.css */
+/* ==========================================================
+   THEME: SOFT BLUE × GREY GLOSSY PREMIUM UI
+   ========================================================== */
 
 /* Variabel Warna */
 :root {
-    --primary-color: #6A3EA1; /* Ungu Utama */
-    --secondary-bg: #E5D9F3; 
-    --background-color: #F6F3F8; 
-    --card-background: #FFFFFF;
-    --text-color: #333333;
-    --light-text-color: #666666;
-    --active-status: #4CAF50; 
-    --overdue-status: #F44336; 
-    --complete-status: #2196F3; 
-    --button-primary: #6A3EA1; /* Variabel yang digunakan untuk warna tombol */
+    --bg: #EEF1F6;
+    --bg-dark: #DDE2EA;
+
+    --sidebar: #20242F; 
+    --sidebar-glow: rgba(50, 80, 255, 0.25);
+
+    --card: #F7F9FC;
+    --card-shadow: rgba(0, 0, 0, 0.08);
+
+    --text: #1E1F22;
+    --text-light: #717783;
+
+    --blue: #4A8BFF;        /* Soft glossy blue */
+    --blue-dark: #3A6FE0;
+    --blue-light: #E2ECFF;
+
+    --border: #D7DCE3;
 }
 
-/* Reset Dasar */
+/* ==========================================================
+   Global Reset & Base
+   ========================================================== */
 * {
-    box-sizing: border-box;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
+
 body {
-    font-family: 'Arial', sans-serif;
-    background: var(--background-color);
-    color: var(--text-color);
+    font-family: "Inter", sans-serif;
+    color: var(--text);
+    background: linear-gradient(135deg, var(--bg), var(--bg-dark));
+    letter-spacing: 0.2px;
 }
 
-h1 {
-    font-size: 2em;
-    margin-bottom: 25px;
-    font-weight: bold;
-}
-
-/* --- Sidebar Styling --- */
+/* ==========================================================
+   Sidebar – Glossy + Glow
+   ========================================================== */
 .sidebar {
-    width: 230px;
+    width: 250px;
     height: 100vh;
-    background: var(--primary-color);
-    color: white;
     position: fixed;
     left: 0;
     top: 0;
-    padding: 20px;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    padding: 30px 22px;
+    background: var(--sidebar);
+    box-shadow: 8px 0 20px rgba(0,0,0,0.25);
+    border-right: 1px solid rgba(255,255,255,0.05);
+
+    /* Glow biru halus */
+    box-shadow: 0 0 25px var(--sidebar-glow);
 }
+
 .sidebar h2 {
-    font-size: 16px; 
-    margin-bottom: 30px;
-    font-weight: normal;
-    text-transform: uppercase;
-    color: #f0f0f0;
-}
-.sidebar a {
     color: white;
-    text-decoration: none;
-    display: flex; 
+    opacity: 0.9;
+    font-size: 18px;
+    margin-bottom: 35px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+}
+
+.sidebar a {
+    color: #CFD6E5;
+    opacity: 0.85;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    display: flex;
     align-items: center;
-    padding: 10px 15px;
-    margin: 5px 0;
-    border-radius: 6px;
-    transition: background 0.3s;
-}
-.sidebar a i {
-    margin-right: 10px;
-}
-.sidebar a:hover {
-    background: #8C5BDC; 
-}
-
-/* --- Konten Utama --- */
-.content {
-    margin-left: 260px; /* Margin untuk menghindari sidebar */
-    padding: 30px;
-    padding-top: 15px;
-}
-
-/* --- Card Styling --- */
-.card {
-    background: var(--card-background);
-    padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    margin-bottom: 20px; 
-}
-.card h3 { 
-    margin: 0 0 20px 0; 
-    font-size: 1.2em;
+    gap: 12px;
+    transition: 0.25s;
 }
 
-/* --- Tombol Styling --- */
+.sidebar a:hover {
+    background: rgba(255,255,255,0.1);
+    opacity: 1;
+    transform: translateX(6px);
+}
+
+/* ==========================================================
+   Content Area
+   ========================================================== */
+.content {
+    margin-left: 125px;
+    padding: 35px;
+}
+
+/* ==========================================================
+   Card – Neumorphism Glossy
+   ========================================================== */
+.card {
+    background: var(--card);
+    padding: 25px;
+    border-radius: 18px;
+    
+    box-shadow:
+        6px 6px 17px rgba(0,0,0,0.10),
+        -4px -4px 12px rgba(255,255,255,0.4);
+
+    border: 1px solid var(--border);
+}
+.card-dashboard {
+    background: var(--card);
+    padding: 25px;
+    border-radius: 18px;
+    
+    box-shadow:
+        6px 6px 17px rgba(0,0,0,0.10),
+        -4px -4px 12px rgba(255,255,255,0.4);
+
+    border: 1px solid var(--border);
+    margin-left: px;
+    margin-bottom: 5px;
+
+}
+
+
+/* ==========================================================
+   Button – Gradient Glossy
+   ========================================================== */
 .btn {
-    padding: 10px 15px; 
-    border: none;
-    border-radius: 6px; 
+    padding: 18px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    display: inline-block;
     cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.3s;
-    text-decoration: none; 
-    display: inline-block; 
-    text-align: center;
+    text-decoration: none;
+    transition: 0.25s;
+    margin-left: 900px;
+}
+.btn-add {
+    padding: 18px 20px;
+    border-radius: 10px;
+    font-weight: 600;
+    display: inline-block;
+    cursor: pointer;
+    text-decoration: none;
+    transition: 0.25s;
+    margin-left: 10px;
+    margin-top: 20px;
 }
 
 .primary-btn {
-    background-color: var(--primary-color); 
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark));
     color: white;
+    box-shadow: 0 4px 10px rgba(50, 100, 255, 0.25);
+
 }
 
-/* ========================================================== */
-/* Gaya Tabel Khusus untuk Daftar Proyek (.project-list-table) */
-/* ========================================================== */
-
-.project-list-table,
-.project-list-table th,
-.project-list-table td {
-    border: 1px solid #e3dff0;  /* garis tipis ungu muda */
+.primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(50, 100, 255, 0.35);
 }
 
-.project-list-table {
-    border-collapse: collapse;
+/* ==========================================================
+   Form – Modern Soft Input
+   ========================================================== */
+.form-input {
     width: 100%;
-    border-radius: 8px;
-    overflow: hidden; /* biar rounded rapi */
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: #F3F5F9;
+
+    box-shadow:
+       inset 3px 3px 6px rgba(0,0,0,0.07),
+       inset -3px -3px 6px rgba(255,255,255,0.7);
+
+    transition: 0.25s;
+}
+
+.form-input:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 6px rgba(50, 100, 255, 0.3);
+    outline: none;
+}
+
+/* ==========================================================
+   Table – Clean Premium
+   ========================================================== */
+.project-list-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px; /* Row floating glossy */
 }
 
 .project-list-table th {
-    background: #F1EBFA; /* ungu muda header */
-    font-weight: 600;
-    color: var(--primary-color);
-    padding: 12px;
+    padding: 14px;
+    font-size: 0.9em;
+    text-transform: uppercase;
+    color: var(--text-light);
+}
+
+.project-list-table tr {
+    background: var(--card);
+    box-shadow:
+        2px 2px 8px rgba(0,0,0,0.08),
+        -2px -2px 8px rgba(255,255,255,0.5);
 }
 
 .project-list-table td {
-    padding: 10px;
+    padding: 14px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
 }
 
-/* Gaya Progress Bar untuk di dalam Tabel */
+/* Hover efek glossy */
+.project-list-table tr:hover {
+    background: #FAFBFE;
+    transform: scale(1.01);
+    transition: 0.25s;
+}
+
+/* ==========================================================
+   Progress Bar – Futuristic Glass
+   ========================================================== */
 .progress-bar-bg {
-    background: var(--secondary-bg); 
-    height: 8px;
-    border-radius: 4px;
+    background: #D7DEEA;
+    height: 10px;
+    border-radius: 10px;
     overflow: hidden;
-    margin: 5px 0;
-}
-.progress-fill {
-    background: var(--primary-color); 
-    height: 100%;
-    border-radius: 4px;
-    transition: width 0.5s;
 }
 
+.progress-fill {
+    height: 100%;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--blue), var(--blue-dark));
+    box-shadow: 0 0 8px rgba(50, 100, 255, 0.4);
+    transition: 0.4s ease;
+}

@@ -18,19 +18,19 @@ $project_name_display = $active_project['nama_proyek'] ?? 'New Website';
     <div class="grid-3 stats-row">
 
         <!-- Card 1: Total Proyek -->
-        <div class="card stat-card">
+        <div class="card-dashboard">
             <h3>Total Proyek</h3>
             <p class="stat-value"><?= $total_projects ?? 0 ?></p>
         </div>
 
         <!-- Card 2: Total Tugas -->
-        <div class="card stat-card">
+        <div class="card-dashboard">
             <h3>Total Tugas</h3>
             <p class="stat-value"><?= $total_tasks ?? 0 ?></p>
         </div>
 
         <!-- Card 3: Total Tim -->
-        <div class="card stat-card">
+        <div class="card-dashboard">
             <h3>Total Tim</h3>
             <p class="stat-value"><?= $total_teams ?? 0 ?></p>
         </div>
@@ -56,7 +56,7 @@ $project_name_display = $active_project['nama_proyek'] ?? 'New Website';
                 </div>
 
                 <div class="progress-actions">
-                    <a href="index.php?page=project_create" class="btn primary-btn">Add Project</a>
+                    <a href="index.php?page=project_create" class="btn-add primary-btn">Add Project</a>
                     <a href="index.php?page=projects" class="btn secondary-btn">View Projects</a>
                 </div>
             </div>

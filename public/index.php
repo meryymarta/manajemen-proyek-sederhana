@@ -24,6 +24,7 @@ spl_autoload_register(function ($class) {
         require_once __DIR__ . '/../app/controllers/' . $class . '.php';
         return;
     }
+    // Coba temukan di models
     if (file_exists(__DIR__ . '/../app/models/' . $class . '.php')) {
         require_once __DIR__ . '/../app/models/' . $class . '.php';
         return;
@@ -47,13 +48,17 @@ try {
         /* ====== PROJECT ROUTING ====== */
         case 'projects':
         case 'project_create':
-        case 'project_store':
+        case 'project_store': // <--- Halaman ini yang sedang diakses
         case 'project_edit':
         case 'project_update':
         case 'project_delete':
+            // Logika baru untuk menentukan aksi:
+            // 1. Ambil kata setelah prefix (e.g., 'create', 'store')
             $action = str_replace('project_', '', $page);
+            // 2. Jika $page hanya 'projects', aksi default adalah 'index'
             if ($page === 'projects') $action = 'index';
             
+            // Baris 58: Panggilan ke ProjectController
             (new ProjectController($db))->$action();
             break;
 
@@ -63,7 +68,7 @@ try {
         case 'task_store':
         case 'task_edit':
         case 'task_update':
-        case 'task_delete': // Tambahkan action ini untuk Task
+        case 'task_delete':
             $action = str_replace('task_', '', $page);
             if ($page === 'tasks') $action = 'index';
             
