@@ -1,0 +1,151 @@
+/* public/css/style.css */
+
+/* Variabel Warna */
+:root {
+    --primary-color: #6A3EA1; /* Ungu Utama */
+    --secondary-bg: #E5D9F3; 
+    --background-color: #F6F3F8; 
+    --card-background: #FFFFFF;
+    --text-color: #333333;
+    --light-text-color: #666666;
+    --active-status: #4CAF50; 
+    --overdue-status: #F44336; 
+    --complete-status: #2196F3; 
+    --button-primary: #6A3EA1; /* Variabel yang digunakan untuk warna tombol */
+}
+
+/* Reset Dasar */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+body {
+    font-family: 'Arial', sans-serif;
+    background: var(--background-color);
+    color: var(--text-color);
+}
+
+h1 {
+    font-size: 2em;
+    margin-bottom: 25px;
+    font-weight: bold;
+}
+
+/* --- Sidebar Styling --- */
+.sidebar {
+    width: 230px;
+    height: 100vh;
+    background: var(--primary-color);
+    color: white;
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+}
+.sidebar h2 {
+    font-size: 16px; 
+    margin-bottom: 30px;
+    font-weight: normal;
+    text-transform: uppercase;
+    color: #f0f0f0;
+}
+.sidebar a {
+    color: white;
+    text-decoration: none;
+    display: flex; 
+    align-items: center;
+    padding: 10px 15px;
+    margin: 5px 0;
+    border-radius: 6px;
+    transition: background 0.3s;
+}
+.sidebar a i {
+    margin-right: 10px;
+}
+.sidebar a:hover {
+    background: #8C5BDC; 
+}
+
+/* --- Konten Utama --- */
+.content {
+    margin-left: 260px; /* Margin untuk menghindari sidebar */
+    padding: 30px;
+    padding-top: 15px;
+}
+
+/* --- Card Styling --- */
+.card {
+    background: var(--card-background);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    margin-bottom: 20px; 
+}
+.card h3 { 
+    margin: 0 0 20px 0; 
+    font-size: 1.2em;
+}
+
+/* --- Tombol Styling --- */
+.btn {
+    padding: 10px 15px; 
+    border: none;
+    border-radius: 6px; 
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+    text-decoration: none; 
+    display: inline-block; 
+    text-align: center;
+}
+
+.primary-btn {
+    background-color: var(--primary-color); 
+    color: white;
+}
+
+/* ========================================================== */
+/* Gaya Tabel Khusus untuk Daftar Proyek (.project-list-table) */
+/* ========================================================== */
+
+.project-list-table,
+.project-list-table th,
+.project-list-table td {
+    border: 1px solid #e3dff0;  /* garis tipis ungu muda */
+}
+
+.project-list-table {
+    border-collapse: collapse;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden; /* biar rounded rapi */
+}
+
+.project-list-table th {
+    background: #F1EBFA; /* ungu muda header */
+    font-weight: 600;
+    color: var(--primary-color);
+    padding: 12px;
+}
+
+.project-list-table td {
+    padding: 10px;
+}
+
+/* Gaya Progress Bar untuk di dalam Tabel */
+.progress-bar-bg {
+    background: var(--secondary-bg); 
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 5px 0;
+}
+.progress-fill {
+    background: var(--primary-color); 
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.5s;
+}
+
