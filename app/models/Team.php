@@ -2,102 +2,100 @@
 // app/models/Team.php
 
 class Team {
-    private $db;
-    private $table_name = "tim"; // Nama tabel di database
+    private $conn;
+    private $table_name = "tim"; 
 
-    /**
-     * Konstruktor
-     * @param PDO $db Koneksi database PDO
-     */
     public function __construct($db) {
-        $this->db = $db;
+        $this->conn = $db;
     }
 
-    /**
-     * Menghitung total jumlah tim.
-     * Digunakan oleh DashboardController.
-     * @return int Jumlah tim
-     */
+    // --- FUNGSI PENTING UNTUK DASHBOARD ---
+    // Fungsi inilah yang dicari oleh DashboardController
     public function countAll() {
         try {
-            $query = "SELECT COUNT(*) FROM " . $this->table_name;
-            $stmt = $this->db->query($query);
+            $sql = "SELECT COUNT(*) FROM " . $this->table_name;
+            $stmt = $this->conn->query($sql);
             return $stmt->fetchColumn();
         } catch (PDOException $e) {
-            // Dalam aplikasi nyata, log error ini
+            error_log("Error counting teams: " . $e->getMessage());
             return 0; 
         }
     }
 
-    /**
-     * Mengambil semua data tim dari database.
-     * @return array Array berisi semua data tim
-     */
+    // --- AMBIL SEMUA DATA (Daftar Tim + Anggota) ---
     public function all() {
-        $query = "SELECT * FROM " . $this->table_name . " ORDER BY nama_tim ASC";
-        $stmt = $this->db->prepare($query);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-    
-    /**
-     * Menyimpan (Create) data tim baru ke database.
-     * Menggunakan Prepared Statement untuk mencegah SQL Injection.
-     * @param array $data Data tim (nama_tim, deskripsi, dll.)
-     * @return bool True jika berhasil, False jika gagal
-     */
-    public function create($data) {
-        $query = "INSERT INTO " . $this->table_name . " (nama_tim, deskripsi) VALUES (:nama_tim, :deskripsi)";
-        $stmt = $this->db->prepare($query);
-
-        // Bind parameter
-        $stmt->bindParam(':nama_tim', $data[':nama_tim']);
-        $stmt->bindParam(':deskripsi', $data[':deskripsi']);
+        // Menggunakan Sub-query agar aman dari error GROUP BY
+        $sql = "SELECT 
+                    t.id_tim,
+                    t.nama_tim,
+                    t.deskripsi,
+                    (
+                        SELECT string_agg(nama, ', ') 
+                        FROM anggota_tim 
+                        WHERE id_tim = t.id_tim
+                    ) AS daftar_anggota,
+                    (
+                        SELECT COUNT(*) 
+                        FROM anggota_tim 
+                        WHERE id_tim = t.id_tim
+                    ) AS jumlah_anggota
+                FROM tim t
+                ORDER BY t.id_tim DESC";
         
-        return $stmt->execute();
+        try {
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            return [];
+        }
     }
 
-    /**
-     * Mencari data tim berdasarkan ID.
-     * @param int $id ID tim
-     * @return array|bool Data tim atau False jika tidak ditemukan
-     */
+    // --- FIND BY ID ---
     public function find($id) {
-        $query = "SELECT * FROM " . $this->table_name . " WHERE id_tim = :id LIMIT 1";
-        $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':id', $id);
-        $stmt->execute();
+        $sql = "SELECT * FROM " . $this->table_name . " WHERE id_tim = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([':id' => $id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Memperbarui (Update) data tim yang sudah ada.
-     * @param array $data Data tim yang diperbarui (termasuk :id)
-     * @return bool True jika berhasil, False jika gagal
-     */
-    public function update($data) {
-        $query = "UPDATE " . $this->table_name . " SET 
-                    nama_tim = :nama_tim, 
-                    deskripsi = :deskripsi 
-                  WHERE id_tim = :id";
-        $stmt = $this->db->prepare($query);
-
-        $stmt->bindParam(':id', $data[':id']);
-        $stmt->bindParam(':nama_tim', $data[':nama_tim']);
-        $stmt->bindParam(':deskripsi', $data[':deskripsi']);
-
-        return $stmt->execute();
+    // --- CREATE ---
+    public function create($data) {
+        try {
+            $sql = "INSERT INTO " . $this->table_name . " (nama_tim, deskripsi) VALUES (:nama, :deskripsi)";
+            $stmt = $this->conn->prepare($sql);
+            return $stmt->execute([
+                ':nama'      => $data['nama'],
+                ':deskripsi' => $data['deskripsi']
+            ]);
+        } catch (PDOException $e) {
+            return false;
+        }
     }
 
-    /**
-     * Menghapus (Delete) data tim berdasarkan ID.
-     * @param int $id ID tim
-     * @return bool True jika berhasil, False jika gagal
-     */
+    // --- UPDATE ---
+    public function update($data) {
+        try {
+            $sql = "UPDATE " . $this->table_name . " SET nama_tim = :nama, deskripsi = :deskripsi WHERE id_tim = :id";
+            $stmt = $this->conn->prepare($sql);
+            return $stmt->execute([
+                ':id'        => $data['id'],
+                ':nama'      => $data['nama'],
+                ':deskripsi' => $data['deskripsi']
+            ]);
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
+
+    // --- DELETE ---
     public function delete($id) {
-        $query = "DELETE FROM " . $this->table_name . " WHERE id_tim = :id";
-        $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':id', $id);
-        return $stmt->execute();
+        try {
+            $sql = "DELETE FROM " . $this->table_name . " WHERE id_tim = :id";
+            $stmt = $this->conn->prepare($sql);
+            return $stmt->execute([':id' => $id]);
+        } catch (PDOException $e) {
+            return false;
+        }
     }
 }

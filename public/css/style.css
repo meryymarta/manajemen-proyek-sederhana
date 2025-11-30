@@ -1,31 +1,25 @@
 /* ==========================================================
    THEME: SOFT BLUE × GREY GLOSSY PREMIUM UI
+   Status: FINAL FIXED (Full Width & Grid Layout)
    ========================================================== */
 
-/* Variabel Warna */
+/* --- 1. VARIABEL WARNA --- */
 :root {
     --bg: #EEF1F6;
     --bg-dark: #DDE2EA;
-
     --sidebar: #20242F; 
     --sidebar-glow: rgba(50, 80, 255, 0.25);
-
     --card: #F7F9FC;
     --card-shadow: rgba(0, 0, 0, 0.08);
-
     --text: #1E1F22;
     --text-light: #717783;
-
-    --blue: #4A8BFF;        /* Soft glossy blue */
+    --blue: #4A8BFF;
     --blue-dark: #3A6FE0;
     --blue-light: #E2ECFF;
-
     --border: #D7DCE3;
 }
 
-/* ==========================================================
-   Global Reset & Base
-   ========================================================== */
+/* --- 2. RESET DASAR --- */
 * {
     margin: 0;
     padding: 0;
@@ -37,11 +31,10 @@ body {
     color: var(--text);
     background: linear-gradient(135deg, var(--bg), var(--bg-dark));
     letter-spacing: 0.2px;
+    min-height: 100vh;
 }
 
-/* ==========================================================
-   Sidebar – Glossy + Glow
-   ========================================================== */
+/* --- 3. SIDEBAR --- */
 .sidebar {
     width: 250px;
     height: 100vh;
@@ -50,11 +43,9 @@ body {
     top: 0;
     padding: 30px 22px;
     background: var(--sidebar);
-    box-shadow: 8px 0 20px rgba(0,0,0,0.25);
-    border-right: 1px solid rgba(255,255,255,0.05);
-
-    /* Glow biru halus */
     box-shadow: 0 0 25px var(--sidebar-glow);
+    border-right: 1px solid rgba(255,255,255,0.05);
+    z-index: 100;
 }
 
 .sidebar h2 {
@@ -76,6 +67,7 @@ body {
     border-radius: 10px;
     gap: 12px;
     transition: 0.25s;
+    text-decoration: none;
 }
 
 .sidebar a:hover {
@@ -84,74 +76,165 @@ body {
     transform: translateX(6px);
 }
 
-/* ==========================================================
-   Content Area
-   ========================================================== */
+/* --- 4. CONTENT AREA (FIXED LAYOUT) --- */
 .content {
-    margin-left: 125px;
-    padding: 35px;
-}
-
-/* ==========================================================
-   Card – Neumorphism Glossy
-   ========================================================== */
-.card {
-    background: var(--card);
-    padding: 25px;
-    border-radius: 18px;
+    /* Margin kiri harus sama/lebih besar dari lebar sidebar (250px) */
+    margin-left: 150px; 
+    padding: 40px;
     
-    box-shadow:
-        6px 6px 17px rgba(0,0,0,0.10),
-        -4px -4px 12px rgba(255,255,255,0.4);
-
-    border: 1px solid var(--border);
+    /* Layout Flex agar rapi di tengah */
+    display: flex;
+    flex-direction: column;
+    align-items: stretch; 
+    min-height: 100vh;
 }
+
+.content h1 {
+    width: 100%; /* Judul rata kiri penuh */
+    margin-bottom: 25px;
+}
+
+/* --- 5. GRID SYSTEM UTAMA (Card Atas) --- */
+.stats-grid {
+    display: grid;
+    /* 3 Kolom horizontal sama besar */
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 30px;
+    margin-bottom: 30px;
+    
+    /* FIXED: Agar card LEBAR dan BESAR memenuhi layar */
+    width: 100%;      
+    max-width: 100%;  
+}
+
+/* --- 6. STYLE CARD ATAS (KOTAK) --- */
 .card-dashboard {
     background: var(--card);
     padding: 25px;
     border-radius: 18px;
-    
-    box-shadow:
-        6px 6px 17px rgba(0,0,0,0.10),
-        -4px -4px 12px rgba(255,255,255,0.4);
-
     border: 1px solid var(--border);
-    margin-left: px;
-    margin-bottom: 5px;
+    
+    /* Shadow Glossy */
+    box-shadow: 6px 6px 14px rgba(0,0,0,0.10), -4px -4px 12px rgba(255,255,255,0.4);
 
+    /* Center Content */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    /* Ukuran: Tetap lebar tapi punya tinggi minimal agar terlihat kotak */
+    width: 100%;
+    min-height: 180px; 
 }
 
+.card-dashboard h3 {
+    font-size: 14px;
+    text-transform: uppercase;
+    color: var(--text-light);
+    margin-bottom: 15px;
+}
 
-/* ==========================================================
-   Button – Gradient Glossy
-   ========================================================== */
+.stat-value {
+    font-size: 48px; /* Angka Besar */
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1;
+}
+
+/* --- 7. GRID BAGIAN BAWAH (ACTIVE PROJECT) - YANG SEBELUMNYA RUSAK --- */
+.main-grid {
+    display: grid;
+    /* Kiri (Project) lebih lebar 2x lipat dari kanan */
+    grid-template-columns: 2fr 1fr; 
+    gap: 30px;
+    
+    /* FIXED: Agar memenuhi lebar layar */
+    width: 150%;
+    max-width: 200%;
+}
+
+/* Style Kartu Active Project (Agar ada background putihnya) */
+.active-project-card {
+    background: var(--card);
+    padding: 60px;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    box-shadow: 6px 6px 14px rgba(0,0,0,0.10), -4px -4px 12px rgba(255,255,255,0.4);
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.active-project-card h3 {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: var(--text);
+}
+
+/* Info Progress (Nama & Persen) */
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    font-weight: 600;
+    color: var(--text-light);
+}
+
+/* Progress Bar Track */
+.progress-bar-bg {
+    background: #D7DEEA;
+    height: 12px;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 25px;
+    width: 100%;
+}
+
+/* Progress Bar Isi */
+.progress-fill {
+    height: 100%;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--blue), var(--blue-dark));
+}
+
+/* Tombol Action */
+.progress-actions {
+    display: flex;
+    gap: 15px;
+}
+
+/* Style Kartu Kosong (Kanan Bawah) */
+.empty-card {
+    border: 2px dashed var(--border);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-light);
+    font-style: italic;
+    min-height: 200px;
+}
+
+/* --- 8. BUTTON STYLES --- */
 .btn {
-    padding: 18px 20px;
+    padding: 12px 25px;
     border-radius: 10px;
     font-weight: 600;
     display: inline-block;
     cursor: pointer;
     text-decoration: none;
     transition: 0.25s;
-    margin-left: 900px;
-}
-.btn-add {
-    padding: 18px 20px;
-    border-radius: 10px;
-    font-weight: 600;
-    display: inline-block;
-    cursor: pointer;
-    text-decoration: none;
-    transition: 0.25s;
-    margin-left: 10px;
-    margin-top: 20px;
+    font-size: 14px;
 }
 
 .primary-btn {
     background: linear-gradient(135deg, var(--blue), var(--blue-dark));
     color: white;
     box-shadow: 0 4px 10px rgba(50, 100, 255, 0.25);
-
+    border: none;
 }
 
 .primary-btn:hover {
@@ -159,79 +242,136 @@ body {
     box-shadow: 0 8px 16px rgba(50, 100, 255, 0.35);
 }
 
-/* ==========================================================
-   Form – Modern Soft Input
-   ========================================================== */
-.form-input {
-    width: 100%;
-    padding: 12px 14px;
-    border-radius: 10px;
+.secondary-btn {
+    background: transparent;
+    color: var(--blue-dark);
     border: 1px solid var(--border);
-    background: #F3F5F9;
-
-    box-shadow:
-       inset 3px 3px 6px rgba(0,0,0,0.07),
-       inset -3px -3px 6px rgba(255,255,255,0.7);
-
-    transition: 0.25s;
 }
 
-.form-input:focus {
-    border-color: var(--blue);
-    box-shadow: 0 0 6px rgba(50, 100, 255, 0.3);
-    outline: none;
+.secondary-btn:hover {
+    background: #F0F4FF;
+}
+
+/* --- 9. RESPONSIF (HP/TABLET) --- */
+@media (max-width: 900px) {
+    .content {
+        margin-left: 0; /* Hilangkan margin sidebar di HP */
+        padding: 20px;
+    }
+    .sidebar {
+        display: none; /* Sembunyikan sidebar di HP */
+    }
+    /* Ubah grid jadi 1 kolom ke bawah */
+    .stats-grid, .main-grid {
+        grid-template-columns: 1fr; 
+    }
 }
 
 /* ==========================================================
-   Table – Clean Premium
+   STYLE UNTUK HALAMAN PROJECT LIST (TABEL)
+   Tempel ini di paling bawah style.css
    ========================================================== */
+
+/* 1. Style Container "Card" (Wadah Tabel) */
+/* Di PHP kamu pakai <div class="card"> tapi class ini belum ada di CSS */
+.card {
+    background: #FFFFFF; /* Warna putih bersih */
+    padding: 30px;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05); /* Bayangan halus */
+    margin-top: 20px;
+    overflow-x: auto; /* Agar bisa discroll di HP */
+}
+
+/* 2. Style Tabel Utama */
 .project-list-table {
     width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 8px; /* Row floating glossy */
+    border-collapse: separate; /* Wajib separate agar bisa kasih jarak antar baris */
+    border-spacing: 0 12px;    /* Memberi jarak vertikal antar baris (efek melayang) */
 }
 
+/* 3. Header Tabel (Judul Kolom) */
 .project-list-table th {
-    padding: 14px;
-    font-size: 0.9em;
+    text-align: left;
+    padding: 0 20px 10px 20px; /* Padding bawah agar berjarak dari isi */
+    font-size: 13px;
+    font-weight: 700;
     text-transform: uppercase;
     color: var(--text-light);
+    letter-spacing: 0.8px;
+    border-bottom: 2px solid var(--border); /* Garis bawah header */
 }
 
-.project-list-table tr {
-    background: var(--card);
-    box-shadow:
-        2px 2px 8px rgba(0,0,0,0.08),
-        -2px -2px 8px rgba(255,255,255,0.5);
+/* 4. Baris Isi Tabel (Row) */
+.project-list-table tbody tr {
+    background: #FFFFFF;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
+/* Efek Hover (Saat mouse di atas baris) */
+.project-list-table tbody tr:hover td {
+    background-color: #FAFBFF; /* Biru sangat muda saat hover */
+    transform: scale(1.005);
+    cursor: default;
+}
+
+/* 5. Sel Data (Isi) - INI YANG MEMBUAT GARIS MUNCUL */
 .project-list-table td {
-    padding: 14px;
+    padding: 20px;
+    background: #FFFFFF;
     border-top: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: middle;
+    font-size: 14px;
 }
 
-/* Hover efek glossy */
-.project-list-table tr:hover {
-    background: #FAFBFE;
-    transform: scale(1.01);
-    transition: 0.25s;
+/* Membuat sudut kiri dan kanan baris melengkung (Rounded Corners) */
+.project-list-table td:first-child {
+    border-left: 1px solid var(--border);
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+    font-weight: 600; /* Nama proyek tebal */
+    color: var(--text);
 }
 
-/* ==========================================================
-   Progress Bar – Futuristic Glass
-   ========================================================== */
-.progress-bar-bg {
-    background: #D7DEEA;
-    height: 10px;
-    border-radius: 10px;
+.project-list-table td:last-child {
+    border-right: 1px solid var(--border);
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+/* 6. Style Progress Bar Kecil di Tabel */
+.project-list-table .progress-bar-bg {
+    background: #EDF2F7;
+    height: 8px;
+    border-radius: 4px;
+    width: 100%;
+    margin-bottom: 5px;
     overflow: hidden;
 }
 
-.progress-fill {
+.project-list-table .progress-fill {
     height: 100%;
-    border-radius: 10px;
+    border-radius: 4px;
     background: linear-gradient(90deg, var(--blue), var(--blue-dark));
-    box-shadow: 0 0 8px rgba(50, 100, 255, 0.4);
-    transition: 0.4s ease;
+}
+
+/* 7. Link Edit / Hapus */
+.project-list-table a {
+    text-decoration: none;
+    transition: 0.2s;
+}
+.project-list-table a:hover {
+    text-decoration: underline;
+}
+
+.btn-add-project, 
+.btn.primary-btn {
+    /* Memaksa lebar tombol menyesuaikan isi teksnya saja */
+    width: fit-content !important; 
+    
+    /* Opsional: Jika tombol ingin di sebelah kiri */
+    align-self: flex-start; 
 }

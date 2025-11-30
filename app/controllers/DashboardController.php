@@ -10,6 +10,7 @@ class DashboardController {
     private $projectModel;
     private $taskModel;
     private $teamModel;
+    private $reportModel;
 
     public function __construct($db) {
         // Inisialisasi Model, berikan koneksi DB ke setiap Model

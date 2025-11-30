@@ -5,72 +5,121 @@ $tasks = $tasks ?? [];
 ?>
 
 <div class="content"> <!-- PENTING: Pembungkus Konten Utama -->
-    <h1>Daftar Tugas</h1>
+    
+    <h1 style="margin-bottom: 20px;">Daftar Tugas</h1>
 
-    <!-- Tombol Tambah Tugas -->
-    <a href="index.php?page=task_create" class="btn primary-btn" style="margin-bottom: 20px; display: inline-block;">
+    <!-- Tombol Tambah Tugas (Konsisten dengan Proyek) -->
+    <a href="index.php?page=task_create" 
+       class="btn btn-add-project" 
+       style="margin-bottom: 25px; display: inline-block; background: linear-gradient(135deg, #4A8BFF, #3A6FE0); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; box-shadow: 0 4px 6px rgba(74, 139, 255, 0.2);">
         + Tambah Tugas Baru
     </a>
 
     <!-- Pembungkus Card untuk tabel -->
     <div class="card">
         
-        <table class="project-list-table" style="width:100%;">
-            <thead>
-                <tr>
-                    <th style="width: 25%;">Nama Tugas</th>
-                    <th style="width: 15%;">Proyek</th>
-                    <th style="width: 15%;">Ditugaskan Kepada</th>
-                    <th style="width: 15%;">Deadline</th>
-                    <th style="width: 10%;">Status</th>
-                    <th style="width: 10%;">Progress</th>
-                    <th style="width: 10%;">Aksi</th>
-                </tr>
-            </thead>
+        <div class="table-responsive">
+            <!-- Gunakan class 'project-list-table' agar style sama dengan Proyek -->
+            <table class="project-list-table" style="width:100%;">
+                <thead>
+                    <tr>
+                        <th style="width: 25%;">Nama Tugas</th>
+                        <th style="width: 15%;">Proyek</th>
+                        <th style="width: 15%;">Ditugaskan Kepada</th>
+                        <th style="width: 15%;">Deadline</th>
+                        <th style="width: 10%;">Status</th>
+                        <th style="width: 10%;">Progress</th>
+                        <th style="width: 10%; text-align: center;">Aksi</th>
+                    </tr>
+                </thead>
 
-            <tbody>
-            <?php if (!empty($tasks)): ?>
-                <?php foreach ($tasks as $task): ?>
-                <tr>
-                    <td><?= htmlspecialchars($task['nama_tugas'] ?? '') ?></td>
-                    <td><?= htmlspecialchars($task['nama_proyek'] ?? 'N/A') ?></td>
-                    <td><?= htmlspecialchars($task['nama_anggota'] ?? 'Belum Ditugaskan') ?></td>
-                    <td><?= htmlspecialchars($task['deadline'] ?? '') ?></td>
-                    
-                    <td>
-                        <!-- Tampilkan Status dengan class warna jika perlu (e.g., status-overdue) -->
-                        <span class="status-<?= strtolower($task['nama_status'] ?? 'pending') ?>">
-                            <?= htmlspecialchars($task['nama_status'] ?? 'Pending') ?>
-                        </span>
-                    </td>
+                <tbody>
+                    <?php if (!empty($tasks)): ?>
+                        <?php foreach ($tasks as $task): ?>
+                            <tr>
+                                <!-- Nama Tugas -->
+                                <td style="font-weight: 600; color: #2d3436;">
+                                    <?= htmlspecialchars($task['nama_tugas'] ?? '') ?>
+                                </td>
+                                
+                                <!-- Nama Proyek -->
+                                <td style="color: #636e72; font-size: 13px;">
+                                    <?= htmlspecialchars($task['nama_proyek'] ?? 'N/A') ?>
+                                </td>
+                                
+                                <!-- Ditugaskan Kepada -->
+                                <td>
+                                    <?php if(!empty($task['nama_anggota'])): ?>
+                                        <span style="background: #eef2ff; color: #4f46e5; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                                            <?= htmlspecialchars($task['nama_anggota']) ?>
+                                        </span>
+                                    <?php else: ?>
+                                        <span style="color: #999; font-style: italic; font-size: 12px;">Belum Ditugaskan</span>
+                                    <?php endif; ?>
+                                </td>
+                                
+                                <!-- Deadline -->
+                                <td style="color: #d63031; font-weight: 500; font-size: 13px;">
+                                    <?= date('d M Y', strtotime($task['deadline'])) ?>
+                                </td>
+                                
+                                <!-- Status (Badge Warna) -->
+                                <td>
+                                    <?php 
+                                        $statusName = $task['nama_status'] ?? 'Pending';
+                                        $statusColor = '#636e72'; // Default Abu
+                                        $statusBg = '#f1f2f6';
 
-                    <td>
-                        <!-- Kolom Progress Bar -->
-                        <?php $progress_value = $task['progress_percent'] ?? 0; ?>
-                        <div class="progress-bar-bg">
-                             <div class="progress-fill" style="width: <?= $progress_value ?>%;"></div>
-                        </div>
-                        <small style="display:block; text-align:right; font-weight:bold;"><?= $progress_value ?>%</small>
-                    </td>
+                                        if (stripos($statusName, 'Done') !== false) {
+                                            $statusColor = '#00b894'; $statusBg = '#daf7f0'; // Hijau
+                                        } elseif (stripos($statusName, 'Progress') !== false) {
+                                            $statusColor = '#0984e3'; $statusBg = '#e3f2fd'; // Biru
+                                        } elseif (stripos($statusName, 'Overdue') !== false) {
+                                            $statusColor = '#d63031'; $statusBg = '#fadbd8'; // Merah
+                                        }
+                                    ?>
+                                    <span style="background: <?= $statusBg ?>; color: <?= $statusColor ?>; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase;">
+                                        <?= htmlspecialchars($statusName) ?>
+                                    </span>
+                                </td>
 
-                    <td>
-                        <a href="index.php?page=task_edit&id=<?= $task['id_tugas'] ?>" style="color: var(--primary-color);">Edit</a> |
-                        <a href="index.php?page=task_delete&id=<?= $task['id_tugas'] ?>"
-                           onclick="return confirm('Hapus tugas ini?')" style="color: var(--overdue-status);">Hapus</a>
-                    </td>
-                </tr>
-                <?php endforeach; ?>
+                                <!-- Progress Bar -->
+                                <td>
+                                    <?php $prog = floatval($task['progress_percent'] ?? 0); ?>
+                                    <div class="progress-bar-bg" style="background: #e2e8f0; height: 6px; border-radius: 4px; overflow: hidden; width: 100%; margin-bottom: 3px;">
+                                        <div class="progress-fill" style="width: <?= $prog ?>%; background: linear-gradient(90deg, #4A8BFF, #3A6FE0); height: 100%; border-radius: 4px;"></div>
+                                    </div>
+                                    <small style="font-weight: bold; color: #3b82f6; font-size: 11px;"><?= $prog ?>%</small>
+                                </td>
 
-            <?php else: ?>
-                <tr>
-                    <!-- Menyatukan 7 kolom ketika data kosong -->
-                    <td colspan="7" style="text-align:center; padding:30px; color: var(--light-text-color);">
-                        Belum ada tugas yang tersedia.
-                    </td>
-                </tr>
-            <?php endif; ?>
-            </tbody>
+                                <!-- Aksi -->
+                                <td style="text-align: center;">
+                                    <div style="display: flex; gap: 5px; justify-content: center;">
+                                        <a href="index.php?page=task_edit&id=<?= $task['id_tugas'] ?>" 
+                                           style="background: #f0f5ff; color: #4A8BFF; padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: 600; border: 1px solid #dbeafe;">
+                                           Edit
+                                        </a>
+                                        <a href="index.php?page=task_delete&id=<?= $task['id_tugas'] ?>"
+                                           onclick="return confirm('Hapus tugas ini?')" 
+                                           style="background: #fff1f2; color: #ff4757; padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 11px; font-weight: 600; border: 1px solid #ffe4e6;">
+                                           Hapus
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
 
-        </table>
+                    <?php else: ?>
+                        <tr>
+                            <td colspan="7" style="text-align:center; padding: 40px; color: #94a3b8;">
+                                <div style="font-size: 15px; font-weight: 500; margin-bottom: 5px;">Belum ada tugas</div>
+                                <div style="font-size: 13px;">Silakan tambah tugas baru untuk memulai.</div>
+                            </td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+
+            </table>
+        </div>
     </div> 
-</div> <!-- PENUTUP CONTENT -->
+</div>

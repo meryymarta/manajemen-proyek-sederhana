@@ -8,6 +8,7 @@ $t = $team;
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
+    /* Style Konsisten dengan Halaman Lain */
     .content-team { font-family: 'Poppins', sans-serif !important; }
     .content-team h1 { font-weight: 700; font-size: 28px; color: #2d3436; }
     
@@ -42,7 +43,7 @@ $t = $team;
 
         <form action="index.php?page=team_update" method="POST">
             
-            <!-- Hidden ID Tim -->
+            <!-- Hidden ID Tim (PENTING untuk proses update) -->
             <input type="hidden" name="id_tim" value="<?= $t['id_tim'] ?>">
 
             <div style="margin-bottom: 25px;">
@@ -52,7 +53,7 @@ $t = $team;
 
             <div style="margin-bottom: 35px;">
                 <label style="display:block; margin-bottom:10px; font-weight:600; color:#475569;">Deskripsi</label>
-                <textarea name="deskripsi" rows="4" class="form-input-lg"><?= htmlspecialchars($t['deskripsi']) ?></textarea>
+                <textarea name="deskripsi" rows="5" class="form-input-lg"><?= htmlspecialchars($t['deskripsi']) ?></textarea>
             </div>
             
             <!-- Tombol Action -->

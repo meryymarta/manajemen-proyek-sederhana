@@ -1,66 +1,89 @@
 <?php 
 // app/views/dashboard.php
-// Pastikan variabel-variabel PHP: $total_projects, $total_tasks, $total_teams, $latest_project, $team_performance
-// sudah tersedia melalui extract($data) di Controller.
-
-// ASUMSI: Proyek aktif pertama adalah yang terbaru
-$active_project = $latest_project[0] ?? ['nama_proyek' => 'No Active Project', 'progress' => 0];
-
-$project_progress_percent = 65; 
-$project_name_display = $active_project['nama_proyek'] ?? 'New Website';
+// $latest_project berisi array proyek (maksimal 3) dari ProjectModel
 ?>
 
 <div class="content">
 
-    <h1>Dashboard</h1>
+    <h1 style="margin-bottom: 25px;">Dashboard</h1>
     
-    <!-- BARIS 1: STATISTIK RINGKAS -->
-    <div class="grid-3 stats-row">
-
-        <!-- Card 1: Total Proyek -->
+    <!-- BARIS 1: STATISTIK -->
+    <div class="stats-grid">
         <div class="card-dashboard">
             <h3>Total Proyek</h3>
             <p class="stat-value"><?= $total_projects ?? 0 ?></p>
         </div>
 
-        <!-- Card 2: Total Tugas -->
         <div class="card-dashboard">
             <h3>Total Tugas</h3>
             <p class="stat-value"><?= $total_tasks ?? 0 ?></p>
         </div>
 
-        <!-- Card 3: Total Tim -->
         <div class="card-dashboard">
             <h3>Total Tim</h3>
             <p class="stat-value"><?= $total_teams ?? 0 ?></p>
         </div>
+    </div> 
 
-    </div> <!-- Tutup grid-3 stats-row -->
-
-    <!-- BARIS 2: PROJECT AKTIF & TEAM PERFORMANCE -->
+    <!-- BARIS 2: PROJECT AKTIF -->
     <div class="main-grid">
         
-        <!-- KOLOM KIRI: PROJECT AKTIF -->
-        <div class="active-project-card card">
-            <h3>Active Project</h3>
+        <!-- KIRI: ACTIVE PROJECTS (LIST) -->
+        <div class="active-project-card">
             
-            <div class="active-project-section">
+            <h3 style="margin-bottom: 20px;">Active Projects (Sedang Berjalan)</h3>
+
+            <?php if (!empty($latest_project)): ?>
                 
-                <div class="progress-info">
-                    <span><?= htmlspecialchars($project_name_display) ?></span>
-                    <span>Progress</span>
+                <!-- LOOPING UNTUK MENAMPILKAN SEMUA PROYEK AKTIF -->
+                <?php foreach ($latest_project as $proj): ?>
+                    <?php 
+                        $prog = floatval($proj['progress']); 
+                        $name = htmlspecialchars($proj['nama_proyek']);
+                    ?>
+                    
+                    <!-- Item Proyek -->
+                    <div style="margin-bottom: 25px; border-bottom: 1px solid #f0f0f0; padding-bottom: 15px;">
+                        
+                        <!-- Info Judul & Persen -->
+                        <div class="progress-info" style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <span style="font-size: 15px; color: #2d3436; font-weight: 600;">
+                                <?= $name ?>
+                            </span>
+                            <span style="font-size: 14px; color: #4A8BFF; font-weight: 700;">
+                                <?= $prog ?>%
+                            </span>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="progress-bar-bg" style="margin-bottom: 10px;">
+                            <div class="progress-fill" style="width: <?= $prog ?>%;"></div>
+                        </div>
+
+                    </div>
+                <?php endforeach; ?>
+
+                <!-- Tombol Aksi di Bawah -->
+                <div class="progress-actions" style="margin-top: 10px;">
+                    <a href="index.php?page=project_create" class="btn primary-btn" style="font-size: 13px; padding: 10px 20px;">Add Project</a>
+                    <a href="index.php?page=projects" class="btn secondary-btn" style="font-size: 13px; padding: 10px 20px;">View All</a>
                 </div>
 
-                <div class="progress-bar-bg">
-                    <div class="progress-fill" style="width: <?= $project_progress_percent ?>%;"></div>
+            <?php else: ?>
+                <!-- Tampilan Jika Tidak Ada Proyek Aktif -->
+                <div style="text-align: center; padding: 30px; color: #999;">
+                    <p style="margin-bottom: 15px;">Belum ada proyek yang sedang berjalan.</p>
+                    <a href="index.php?page=project_create" class="btn primary-btn">Mulai Proyek Baru</a>
                 </div>
-
-                <div class="progress-actions">
-                    <a href="index.php?page=project_create" class="btn-add primary-btn">Add Project</a>
-                    <a href="index.php?page=projects" class="btn secondary-btn">View Projects</a>
-                </div>
-            </div>
+            <?php endif; ?>
 
         </div>
+        
+        <!-- KANAN: EMPTY CARD (Placeholder) -->
+        <div class="empty-card">
+            <p>Team Performance (Coming Soon)</p>
+        </div>
 
-</div> <!-- Tutup content -->
+    </div>
+
+</div>

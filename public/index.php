@@ -10,8 +10,6 @@ require_once "../app/config/database.php";
 $db = (new Database())->connect(); // Koneksi database PDO
 
 // ** PERBAIKAN PATH KRITIS: Menghitung Base URL secara dinamis **
-// BASE_URL ini digunakan di views/layout/header.php untuk memanggil aset (CSS/JS)
-// Ini adalah solusi paling stabil untuk mengatasi masalah path CSS/style.css
 $base_uri = str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']);
 define('BASE_URL', $base_uri); 
 // ** END PERBAIKAN PATH KRITIS **
@@ -48,17 +46,22 @@ try {
         /* ====== PROJECT ROUTING ====== */
         case 'projects':
         case 'project_create':
-        case 'project_store': // <--- Halaman ini yang sedang diakses
+        case 'project_store': 
         case 'project_edit':
         case 'project_update':
         case 'project_delete':
+        case 'project_archive':   // Aksi Arsipkan (Soft Delete)
+        case 'project_archived':  // Halaman Lihat Arsip (Recycle Bin)
+        case 'project_restore':   // Aksi Pulihkan Data
+            
             // Logika baru untuk menentukan aksi:
-            // 1. Ambil kata setelah prefix (e.g., 'create', 'store')
+            // 1. Ambil kata setelah prefix (e.g., 'create', 'store', 'archive', 'archived')
             $action = str_replace('project_', '', $page);
+            
             // 2. Jika $page hanya 'projects', aksi default adalah 'index'
             if ($page === 'projects') $action = 'index';
             
-            // Baris 58: Panggilan ke ProjectController
+            // Panggilan ke ProjectController
             (new ProjectController($db))->$action();
             break;
 
@@ -88,13 +91,12 @@ try {
             (new TeamController($db))->$action();
             break;
 
-        /* ====== REPORTS & 404 ====== */
+        /* ====== REPORTS ====== */
         case 'reports':
-            include "../app/views/layout/header.php";
-            echo "<div class='content'><h1>Laporan Proyek (Under Construction)</h1></div>";
-            include "../app/views/layout/footer.php";
+            // Memanggil ReportController untuk menampilkan data laporan yang sesungguhnya
+            require_once "../app/controllers/ReportController.php";
+            (new ReportController($db))->index();
             break;
-
         default:
             // 404 Handler
             header("HTTP/1.0 404 Not Found");

@@ -1,77 +1,103 @@
-<?php
-// app/controllers/TeamController.php
-
-require_once __DIR__ . "/../models/Team.php";
-
+<?php 
 class TeamController {
-    private $team;
+    private $db; 
+    private $team; // Properti untuk Model
 
     public function __construct($db) {
-        // Menginisialisasi Model Team
-        $this->team = new Team($db);
+        $this->db = $db; 
+        
+        // Memanggil Model Team (Pastikan file app/models/Team.php sudah ada)
+        // Jika belum ada model, kita bisa pakai query manual dulu di sini.
+        // Tapi untuk kerapian, lebih baik pakai model seperti Project.
+        // Di sini saya asumsikan pakai Model agar konsisten.
+        require_once "../app/models/Team.php";
+        $this->team = new Team($db); 
     }
 
+    // --- READ (DAFTAR TIM) ---
     public function index() {
-        // Mengambil semua data tim
+        // Panggil fungsi all() dari Model Team
         $teams = $this->team->all();
 
-        // Tampilkan halaman daftar tim dengan layout
-        include __DIR__ . "/../views/layout/header.php";
-        include __DIR__ . "/../views/team/list.php";
-        include __DIR__ . "/../views/layout/footer.php";
+        include "../app/views/layout/header.php";
+        include "../app/views/team/list.php"; 
+        include "../app/views/layout/footer.php";
     }
 
+    // --- CREATE (FORM TAMBAH) ---
     public function create() {
-        // Tampilkan form pembuatan tim
-        include __DIR__ . "/../views/layout/header.php";
-        include __DIR__ . "/../views/team/create.php";
-        include __DIR__ . "/../views/layout/footer.php";
+        include "../app/views/layout/header.php";
+        include "../app/views/team/create.php"; 
+        include "../app/views/layout/footer.php";
     }
 
+    // --- STORE (SIMPAN DATA BARU) ---
     public function store() {
-        // Proses penyimpanan data tim baru
+        if (empty($_POST['nama_tim'])) {
+            header("Location: index.php?page=team_create&error=" . urlencode("Nama Tim Wajib Diisi!"));
+            return;
+        }
+
+        // Siapkan data array untuk dikirim ke Model
         $data = [
-            // Asumsi field di tabel tim adalah 'nama_tim' dan 'deskripsi'
-            ':nama_tim' => $_POST['nama_tim'], 
-            ':deskripsi' => $_POST['deskripsi'],
+            'nama'      => $_POST['nama_tim'],
+            'deskripsi' => $_POST['deskripsi']
         ];
 
-        $this->team->create($data);
-        
-        // Redirect setelah operasi POST (Pola PRG)
-        header("Location: index.php?page=teams");
-        exit;
+        // Panggil fungsi create() di Model Team
+        if ($this->team->create($data)) {
+            header("Location: index.php?page=teams");
+        } else {
+            header("Location: index.php?page=team_create&error=" . urlencode("Gagal menyimpan tim"));
+        }
     }
 
+    // --- EDIT (FORM EDIT) ---
     public function edit() {
-        // Ambil ID dari URL dan cari data tim
         $id = $_GET['id'];
+        
+        // Ambil data tim berdasarkan ID dari Model
         $team = $this->team->find($id);
 
-        // Tampilkan form edit
-        include __DIR__ . "/../views/layout/header.php";
-        include __DIR__ . "/../views/team/edit.php";
-        include __DIR__ . "/../views/layout/footer.php";
+        if (!$team) {
+            echo "Data tim tidak ditemukan.";
+            return;
+        }
+
+        include "../app/views/layout/header.php";
+        include "../app/views/team/edit.php"; 
+        include "../app/views/layout/footer.php";
     }
 
+    // --- UPDATE (SIMPAN PERUBAHAN) ---
     public function update() {
-        // Proses update data tim
+        $id = $_POST['id_tim'];
+
+        // Siapkan data update
         $data = [
-            ':id' => $_POST['id'],
-            ':nama_tim' => $_POST['nama_tim'],
-            ':deskripsi' => $_POST['deskripsi'],
+            'id'        => $id,
+            'nama'      => $_POST['nama_tim'],
+            'deskripsi' => $_POST['deskripsi']
         ];
 
-        $this->team->update($data);
-        header("Location: index.php?page=teams");
-        exit;
+        // Panggil fungsi update() di Model Team
+        if ($this->team->update($data)) {
+            header("Location: index.php?page=teams");
+        } else {
+            header("Location: index.php?page=team_edit&id=$id&error=" . urlencode("Gagal mengupdate tim"));
+        }
     }
 
+    // --- DELETE (HAPUS TIM) ---
     public function delete() {
-        // Proses penghapusan tim
-        $this->team->delete($_GET['id']);
-        header("Location: index.php?page=teams");
-        exit;
+        $id = $_GET['id'];
+        
+        // Panggil fungsi delete() di Model Team
+        if ($this->team->delete($id)) {
+            header("Location: index.php?page=teams");
+        } else {
+            header("Location: index.php?page=teams&error=" . urlencode("Gagal menghapus tim."));
+        }
     }
 }
 ?>
