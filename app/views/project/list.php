@@ -4,21 +4,44 @@
     
     <h1 style="margin-bottom: 20px;">Daftar Proyek</h1>
     
-    <!-- CONTAINER TOMBOL (Agar sejajar) -->
-    <div style="margin-bottom: 25px;">
+    <!-- CONTAINER TOMBOL & SEARCH (Agar sejajar) -->
+    <!-- Saya menambahkan display: flex agar tombol di kiri dan search di kanan -->
+    <div style="margin-bottom: 25px; display: flex; align-items: center; flex-wrap: wrap; gap: 15px;">
         
         <!-- Tombol Tambah (Biru) -->
         <a href="index.php?page=project_create" 
            class="btn btn-add-project" 
-           style="display: inline-block; background: linear-gradient(135deg, #4A8BFF, #3A6FE0); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; box-shadow: 0 4px 6px rgba(74, 139, 255, 0.2); margin-right: 15px;">
+           style="display: inline-block; background: linear-gradient(135deg, #4A8BFF, #3A6FE0); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; box-shadow: 0 4px 6px rgba(74, 139, 255, 0.2);">
             + Tambah Proyek Baru
         </a>
 
-        <!-- TOMBOL BARU: LIHAT ARSIP (Putih/Abu) -->
+        <!-- TOMBOL: LIHAT ARSIP (Putih/Abu) -->
         <a href="index.php?page=project_archived" 
            style="display: inline-block; background: #fff; color: #64748b; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; border: 1px solid #cbd5e1; transition: 0.2s;">
             📂 Lihat Arsip / Sampah
         </a>
+
+        <!-- FORM PENCARIAN (BARU) -->
+        <!-- margin-left: auto berfungsi mendorong form ini ke sisi paling kanan -->
+        <form method="GET" action="index.php" style="display: flex; gap: 10px; margin-left: auto;">
+            <input type="hidden" name="page" value="projects">
+            
+            <input type="text" name="search" 
+                   value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>" 
+                   placeholder="Cari Proyek / PJ..." 
+                   style="padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 8px; width: 250px; outline: none; transition: 0.3s;">
+            
+            <button type="submit" 
+                    style="background: #334155; color: white; border: none; padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s;">
+                Cari
+            </button>
+            
+            <?php if(isset($_GET['search']) && $_GET['search'] != ''): ?>
+                <a href="index.php?page=projects" 
+                   style="display: flex; align-items: center; justify-content: center; background: #ef4444; color: white; padding: 0 15px; border-radius: 8px; text-decoration: none; font-weight: bold;" 
+                   title="Hapus Pencarian">X</a>
+            <?php endif; ?>
+        </form>
 
     </div>
 
@@ -93,7 +116,11 @@
                     <?php else: ?>
                         <tr>
                             <td colspan="7" style="text-align: center; padding: 40px; color: #999;">
-                                Belum ada data proyek aktif.
+                                <?php if(isset($_GET['search'])): ?>
+                                    Proyek dengan kata kunci "<b><?= htmlspecialchars($_GET['search']) ?></b>" tidak ditemukan.
+                                <?php else: ?>
+                                    Belum ada data proyek aktif.
+                                <?php endif; ?>
                             </td>
                         </tr>
                     <?php endif; ?>

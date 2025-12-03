@@ -9,7 +9,11 @@ class ProjectController {
     }
 
     public function index() {
-        $projects = $this->project->all();
+        // PERBAIKAN: Menangkap keyword pencarian dari URL
+        $keyword = isset($_GET['search']) ? $_GET['search'] : null;
+
+        // Kirim keyword ke model (fungsi all sudah dimodifikasi sebelumnya untuk menerima parameter)
+        $projects = $this->project->all($keyword);
 
         include "../app/views/layout/header.php";
         include "../app/views/project/list.php";

@@ -78,12 +78,3 @@
             <?php endif; ?>
 
         </div>
-        
-        <!-- KANAN: EMPTY CARD (Placeholder) -->
-        <div class="empty-card">
-            <p>Team Performance (Coming Soon)</p>
-        </div>
-
-    </div>
-
-</div>

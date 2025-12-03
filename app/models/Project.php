@@ -3,7 +3,7 @@
 
 class Project {
     private $conn;
-    private $table_name = "proyek"; 
+    private $table_name = "proyek";
 
     public function __construct($db) {
         $this->conn = $db;
@@ -20,27 +20,27 @@ class Project {
             return $stmt->fetchColumn();
         } catch (PDOException $e) {
             error_log("Error counting projects: " . $e->getMessage());
-            return 0; 
+            return 0;
         }
     }
     
     // PERBAIKAN: Menampilkan 3 Proyek Aktif Teratas
     public function getLatest() {
-        // Logika: 
+        // Logika:
         // 1. Ambil yang BELUM dihapus (deleted_at IS NULL)
         // 2. Ambil yang progressnya SUDAH ada (> 0) TAPI belum selesai (< 100)
         // 3. Urutkan dari yang progressnya paling tinggi (mendekati selesai)
         // 4. Jika tidak ada yang > 0, maka tampilkan yang paling baru diedit (updated_at)
         
-        $sql = "SELECT nama_proyek, penanggung_jawab AS pj, 
-                       CASE 
-                           WHEN tanggal_selesai < CURRENT_DATE AND progress < 100 THEN 'Overdue'
-                           WHEN progress >= 100 THEN 'Completed'
-                           WHEN tanggal_mulai > CURRENT_DATE THEN 'Upcoming'
-                           ELSE 'Active' 
-                       END AS status,
-                       progress
-                FROM " . $this->table_name . " 
+        $sql = "SELECT nama_proyek, penanggung_jawab AS pj,
+                        CASE 
+                            WHEN tanggal_selesai < CURRENT_DATE AND progress < 100 THEN 'Overdue'
+                            WHEN progress >= 100 THEN 'Completed'
+                            WHEN tanggal_mulai > CURRENT_DATE THEN 'Upcoming'
+                            ELSE 'Active'
+                        END AS status,
+                        progress
+                FROM " . $this->table_name . "
                 WHERE deleted_at IS NULL 
                 AND progress < 100  -- Jangan tampilkan yang sudah selesai di widget 'Active'
                 ORDER BY 
@@ -54,7 +54,7 @@ class Project {
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log("SQL Error Project getLatest(): " . $e->getMessage());
-            return []; 
+            return [];
         }
     }
 
@@ -62,15 +62,34 @@ class Project {
     // 2. CRUD METHODS
     // ==========================================================
     
-    public function all() {
+    /**
+     * Mengambil semua data proyek (dengan fitur pencarian opsional)
+     * Memenuhi spesifikasi: Search pada minimal 2 field (nama_proyek DAN nama_pj)
+     */
+    public function all($keyword = null) {
         try {
             $sql = "SELECT p.*, a.nama AS nama_pj 
                     FROM " . $this->table_name . " p
                     LEFT JOIN anggota_tim a ON p.penanggung_jawab = a.id_anggota
-                    WHERE p.deleted_at IS NULL 
-                    ORDER BY p.id_proyek DESC";
+                    WHERE p.deleted_at IS NULL";
+            
+            // Tambahkan logika pencarian jika keyword ada
+            if ($keyword) {
+                // Menggunakan ILIKE untuk PostgreSQL (case-insensitive)
+                // Mencari di nama_proyek ATAU nama anggota tim (penanggung jawab)
+                $sql .= " AND (p.nama_proyek ILIKE :keyword OR a.nama ILIKE :keyword)";
+            }
+
+            $sql .= " ORDER BY p.id_proyek DESC";
             
             $stmt = $this->conn->prepare($sql);
+
+            // Binding parameter jika ada keyword
+            if ($keyword) {
+                $searchTerm = "%" . $keyword . "%";
+                $stmt->bindParam(':keyword', $searchTerm);
+            }
+
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
@@ -91,7 +110,7 @@ class Project {
         try {
             $this->conn->beginTransaction();
             $sql = "INSERT INTO " . $this->table_name . " 
-                    (nama_proyek, deskripsi, tanggal_mulai, tanggal_selesai, id_klien, id_tim, budget, penanggung_jawab)
+                    (nama_proyek, deskripsi, tanggal_mulai, tanggal_selesai, id_klien, id_tim, budget, penanggung_jawab) 
                     VALUES (:nama, :deskripsi, :mulai, :selesai, :klien, :tim, :budget, :pj)";
             $stmt = $this->conn->prepare($sql);
             $stmt->execute($data);
@@ -107,13 +126,13 @@ class Project {
     public function update($data) {
         try {
             $sql = "UPDATE " . $this->table_name . " SET 
-                    nama_proyek = :nama,
-                    deskripsi = :deskripsi,
-                    tanggal_mulai = :mulai,
-                    tanggal_selesai = :selesai,
-                    id_klien = :klien,
-                    id_tim = :tim,
-                    budget = :budget,
+                    nama_proyek = :nama, 
+                    deskripsi = :deskripsi, 
+                    tanggal_mulai = :mulai, 
+                    tanggal_selesai = :selesai, 
+                    id_klien = :klien, 
+                    id_tim = :tim, 
+                    budget = :budget, 
                     penanggung_jawab = :pj,
                     updated_at = NOW()
                     WHERE id_proyek = :id";

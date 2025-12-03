@@ -1,26 +1,20 @@
 <?php 
 class TaskController {
     private $db; 
+    private $task; // Tambahkan properti untuk Model Task
 
     public function __construct($db) {
         $this->db = $db; 
+        $this->task = new Task($db); // Inisialisasi Model Task
     }
 
     // --- READ (DAFTAR TUGAS) ---
     public function index() {
-        $sql = "SELECT t.*, 
-                       p.nama_proyek, 
-                       a.nama AS nama_anggota, 
-                       s.nama_status 
-                FROM tugas t
-                LEFT JOIN proyek p ON t.id_proyek = p.id_proyek
-                LEFT JOIN anggota_tim a ON t.id_anggota = a.id_anggota
-                LEFT JOIN status s ON t.id_status = s.id_status
-                WHERE t.deleted_at IS NULL 
-                ORDER BY t.deadline ASC";
+        // PERBAIKAN: Menangkap keyword pencarian dari URL
+        $keyword = isset($_GET['search']) ? $_GET['search'] : null;
 
-        $stmt = $this->db->query($sql);
-        $tasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Menggunakan Model Task untuk mengambil data (sudah support search)
+        $tasks = $this->task->all($keyword);
 
         include "../app/views/layout/header.php";
         include "../app/views/task/list.php"; 
