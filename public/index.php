@@ -3,13 +3,14 @@
 // File ini berfungsi sebagai Front Controller, menangani semua request.
 
 // -----------------------------------------------------------------------------
-// 1. INISIALISASI DAN AUTOLOAD
+// 1. MULAI SESI & INISIALISASI
 // -----------------------------------------------------------------------------
+session_start(); // WAJIB: Memulai sesi untuk login
 
 require_once "../app/config/database.php";
 $db = (new Database())->connect(); // Koneksi database PDO
 
-// ** PERBAIKAN PATH KRITIS: Menghitung Base URL secara dinamis **
+// ** PERBAIKAN PATH KRITIS **
 $base_uri = str_replace(basename($_SERVER['SCRIPT_NAME']), '', $_SERVER['SCRIPT_NAME']);
 define('BASE_URL', $base_uri); 
 // ** END PERBAIKAN PATH KRITIS **
@@ -17,12 +18,10 @@ define('BASE_URL', $base_uri);
 
 // Autoload: Memuat Class Controller dan Model secara otomatis
 spl_autoload_register(function ($class) {
-    // Coba temukan di controllers
     if (file_exists(__DIR__ . '/../app/controllers/' . $class . '.php')) {
         require_once __DIR__ . '/../app/controllers/' . $class . '.php';
         return;
     }
-    // Coba temukan di models
     if (file_exists(__DIR__ . '/../app/models/' . $class . '.php')) {
         require_once __DIR__ . '/../app/models/' . $class . '.php';
         return;
@@ -31,14 +30,42 @@ spl_autoload_register(function ($class) {
 
 
 // -----------------------------------------------------------------------------
-// 2. LOGIKA ROUTING
+// 2. GATEKEEPER (CEK LOGIN)
 // -----------------------------------------------------------------------------
-
 $page = $_GET['page'] ?? 'dashboard';
+
+// Daftar halaman yang boleh diakses TANPA login (Public)
+$public_pages = ['login', 'auth_verify', 'seed_admin'];
+
+// Jika user BELUM login DAN mencoba akses halaman rahasia -> Tendang ke Login
+if (!isset($_SESSION['user_id']) && !in_array($page, $public_pages)) {
+    header("Location: index.php?page=login");
+    exit;
+}
+
+
+// -----------------------------------------------------------------------------
+// 3. LOGIKA ROUTING
+// -----------------------------------------------------------------------------
 
 try {
     switch ($page) {
 
+        /* ====== AUTHENTICATION ====== */
+        case 'login':
+            (new AuthController($db))->login();
+            break;
+        case 'auth_verify':
+            (new AuthController($db))->verify();
+            break;
+        case 'logout':
+            (new AuthController($db))->logout();
+            break;
+        case 'seed_admin': // Buat user pertama
+            (new AuthController($db))->seedAdmin();
+            break;
+
+        /* ====== DASHBOARD ====== */
         case 'dashboard':
             (new DashboardController($db))->index();
             break;
@@ -54,14 +81,9 @@ try {
         case 'project_archived':  // Halaman Lihat Arsip (Recycle Bin)
         case 'project_restore':   // Aksi Pulihkan Data
             
-            // Logika baru untuk menentukan aksi:
-            // 1. Ambil kata setelah prefix (e.g., 'create', 'store', 'archive', 'archived')
             $action = str_replace('project_', '', $page);
-            
-            // 2. Jika $page hanya 'projects', aksi default adalah 'index'
             if ($page === 'projects') $action = 'index';
             
-            // Panggilan ke ProjectController
             (new ProjectController($db))->$action();
             break;
 
@@ -93,10 +115,19 @@ try {
 
         /* ====== REPORTS ====== */
         case 'reports':
-            // Memanggil ReportController untuk menampilkan data laporan yang sesungguhnya
-            require_once "../app/controllers/ReportController.php";
-            (new ReportController($db))->index();
+            // Memanggil ReportController
+            // Pastikan file app/controllers/ReportController.php sudah ada
+            if (file_exists("../app/controllers/ReportController.php")) {
+                require_once "../app/controllers/ReportController.php";
+                (new ReportController($db))->index();
+            } else {
+                // Fallback jika belum ada controller report
+                include "../app/views/layout/header.php";
+                echo "<div class='content'><h1>Laporan Proyek (Under Construction)</h1></div>";
+                include "../app/views/layout/footer.php";
+            }
             break;
+
         default:
             // 404 Handler
             header("HTTP/1.0 404 Not Found");
@@ -108,8 +139,16 @@ try {
 } catch (Exception $e) {
     // Penanganan Error Aplikasi
     header("HTTP/1.0 500 Internal Server Error");
-    include "../app/views/layout/header.php";
-    echo "<div class='content'><h1>Error Aplikasi Internal</h1>";
+    
+    // Cek jika header sudah dikirim (untuk menghindari error output)
+    if (!headers_sent()) {
+         include "../app/views/layout/header.php";
+    }
+    
+    echo "<div class='content' style='padding:20px;'><h1>Error Aplikasi Internal</h1>";
     echo "<p>Pesan Teknis: " . htmlspecialchars($e->getMessage()) . "</p></div>";
-    include "../app/views/layout/footer.php";
+    
+    if (!headers_sent()) {
+        include "../app/views/layout/footer.php";
+    }
 }

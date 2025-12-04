@@ -76,6 +76,20 @@ body {
     transform: translateX(6px);
 }
 
+/* Tombol Logout Spesial */
+.sidebar .logout-menu {
+    margin-top: auto; /* Dorong ke paling bawah */
+    background-color: #ef4444; /* Merah */
+    color: white !important;
+    justify-content: center;
+    font-weight: 600;
+}
+
+.sidebar .logout-menu:hover {
+    background-color: #dc2626;
+    transform: none;
+}
+
 /* --- 4. CONTENT AREA (FIXED LAYOUT) --- */
 .content {
     /* Margin kiri harus sama/lebih besar dari lebar sidebar (250px) */

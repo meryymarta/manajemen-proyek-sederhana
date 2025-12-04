@@ -46,6 +46,7 @@ class Project {
                 ORDER BY 
                     CASE WHEN progress > 0 THEN 1 ELSE 0 END DESC, -- Prioritaskan yang sudah ada progress
                     updated_at DESC -- Kemudian yang paling baru diedit
+                    LIMIT 5
                 "; // Menampilkan maksimal 3 proyek aktif
 
         try {
