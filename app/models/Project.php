@@ -24,30 +24,27 @@ class Project {
         }
     }
     
-    // PERBAIKAN: Menampilkan 3 Proyek Aktif Teratas
+    /**
+     * PERUBAHAN: Mengambil data ringkasan dari Materialized View (mv_summary_proyek)
+     */
     public function getLatest() {
-        // Logika:
-        // 1. Ambil yang BELUM dihapus (deleted_at IS NULL)
-        // 2. Ambil yang progressnya SUDAH ada (> 0) TAPI belum selesai (< 100)
-        // 3. Urutkan dari yang progressnya paling tinggi (mendekati selesai)
-        // 4. Jika tidak ada yang > 0, maka tampilkan yang paling baru diedit (updated_at)
-        
-        $sql = "SELECT nama_proyek, penanggung_jawab AS pj,
+        // MENGGUNAKAN MATERIALIZED VIEW UNTUK KECEPATAN:
+        $sql = "SELECT m.nama_proyek, p.penanggung_jawab AS pj,
                         CASE 
-                            WHEN tanggal_selesai < CURRENT_DATE AND progress < 100 THEN 'Overdue'
-                            WHEN progress >= 100 THEN 'Completed'
-                            WHEN tanggal_mulai > CURRENT_DATE THEN 'Upcoming'
+                            WHEN p.tanggal_selesai < CURRENT_DATE AND m.progress < 100 THEN 'Overdue'
+                            WHEN m.progress >= 100 THEN 'Completed'
+                            WHEN p.tanggal_mulai > CURRENT_DATE THEN 'Upcoming'
                             ELSE 'Active'
                         END AS status,
-                        progress
-                FROM " . $this->table_name . "
-                WHERE deleted_at IS NULL 
-                AND progress < 100  -- Jangan tampilkan yang sudah selesai di widget 'Active'
+                        m.progress
+                FROM mv_summary_proyek m 
+                JOIN proyek p ON m.id_proyek = p.id_proyek -- Join ke tabel proyek asli untuk tanggal & PJ
+                WHERE m.progress < 100
                 ORDER BY 
-                    CASE WHEN progress > 0 THEN 1 ELSE 0 END DESC, -- Prioritaskan yang sudah ada progress
-                    updated_at DESC -- Kemudian yang paling baru diedit
+                    CASE WHEN m.progress > 0 THEN 1 ELSE 0 END DESC, 
+                    p.updated_at DESC
                     LIMIT 5
-                "; // Menampilkan maksimal 3 proyek aktif
+                ";
 
         try {
             $stmt = $this->conn->prepare($sql);
@@ -60,24 +57,42 @@ class Project {
     }
 
     // ==========================================================
+    // 1.5 METODE MATERIALIZED VIEW (BARU)
+    // ==========================================================
+    
+    /**
+     * Menjalankan perintah REFRESH MATERIALIZED VIEW mv_summary_proyek.
+     */
+    public function refreshMView() {
+        try {
+            $sql = "REFRESH MATERIALIZED VIEW mv_summary_proyek"; 
+            $this->conn->exec($sql); 
+            return true;
+        } catch (PDOException $e) {
+            error_log("Error refreshing MView: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    // ==========================================================
     // 2. CRUD METHODS
     // ==========================================================
     
     /**
      * Mengambil semua data proyek (dengan fitur pencarian opsional)
-     * Memenuhi spesifikasi: Search pada minimal 2 field (nama_proyek DAN nama_pj)
+     * PERUBAHAN: LEFT JOIN ke M-View untuk mengambil total_tugas dan selesai.
      */
     public function all($keyword = null) {
         try {
-            $sql = "SELECT p.*, a.nama AS nama_pj 
+            // LEFT JOIN ke M-View untuk mendapatkan total_tugas dan selesai
+            $sql = "SELECT p.*, a.nama AS nama_pj, m.total_tugas, m.selesai AS tugas_selesai
                     FROM " . $this->table_name . " p
                     LEFT JOIN anggota_tim a ON p.penanggung_jawab = a.id_anggota
+                    LEFT JOIN mv_summary_proyek m ON p.id_proyek = m.id_proyek -- JOIN M-VIEW
                     WHERE p.deleted_at IS NULL";
             
             // Tambahkan logika pencarian jika keyword ada
             if ($keyword) {
-                // Menggunakan ILIKE untuk PostgreSQL (case-insensitive)
-                // Mencari di nama_proyek ATAU nama anggota tim (penanggung jawab)
                 $sql .= " AND (p.nama_proyek ILIKE :keyword OR a.nama ILIKE :keyword)";
             }
 

@@ -1,19 +1,21 @@
 <?php 
+// Perlu ada Model Project di folder models
+require_once '../app/models/Project.php';
+
 class TaskController {
     private $db; 
-    private $task; // Tambahkan properti untuk Model Task
+    private $task; 
+    private $project; // DITAMBAHKAN UNTUK REFRESH M-VIEW
 
     public function __construct($db) {
         $this->db = $db; 
-        $this->task = new Task($db); // Inisialisasi Model Task
+        $this->task = new Task($db); 
+        $this->project = new Project($db); // Inisialisasi Model Project
     }
 
     // --- READ (DAFTAR TUGAS) ---
     public function index() {
-        // PERBAIKAN: Menangkap keyword pencarian dari URL
         $keyword = isset($_GET['search']) ? $_GET['search'] : null;
-
-        // Menggunakan Model Task untuk mengambil data (sudah support search)
         $tasks = $this->task->all($keyword);
 
         include "../app/views/layout/header.php";
@@ -23,7 +25,7 @@ class TaskController {
 
     // --- CREATE (TAMBAH TUGAS) ---
     public function create() {
-        // Ambil Data Dropdown
+        // Ambil Data Dropdown (Query Asli)
         $projects = $this->db->query("SELECT * FROM proyek WHERE deleted_at IS NULL ORDER BY nama_proyek ASC")->fetchAll(PDO::FETCH_ASSOC);
         $members  = $this->db->query("SELECT * FROM anggota_tim ORDER BY nama ASC")->fetchAll(PDO::FETCH_ASSOC);
         $statuses = $this->db->query("SELECT * FROM status ORDER BY id_status ASC")->fetchAll(PDO::FETCH_ASSOC);
@@ -53,6 +55,9 @@ class TaskController {
                 ':progress' => $_POST['progress_percent'] ?? 0
             ]);
 
+            // --- REFRESH M-VIEW SETELAH INSERT ---
+            $this->project->refreshMView(); 
+
             header("Location: index.php?page=tasks");
 
         } catch (PDOException $e) {
@@ -64,7 +69,6 @@ class TaskController {
     public function edit() {
         $id = $_GET['id'];
 
-        // 1. Ambil Data Tugas yang mau diedit
         $stmt = $this->db->prepare("SELECT * FROM tugas WHERE id_tugas = :id");
         $stmt->execute([':id' => $id]);
         $task = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -74,14 +78,13 @@ class TaskController {
             return;
         }
 
-        // 2. Ambil Data Dropdown (Sama seperti create)
+        // Ambil Data Dropdown (Query Asli)
         $projects = $this->db->query("SELECT * FROM proyek WHERE deleted_at IS NULL ORDER BY nama_proyek ASC")->fetchAll(PDO::FETCH_ASSOC);
         $members  = $this->db->query("SELECT * FROM anggota_tim ORDER BY nama ASC")->fetchAll(PDO::FETCH_ASSOC);
         $statuses = $this->db->query("SELECT * FROM status ORDER BY id_status ASC")->fetchAll(PDO::FETCH_ASSOC);
 
-        // 3. Panggil View Edit
         include "../app/views/layout/header.php";
-        include "../app/views/task/edit.php"; // Kita buat file ini di bawah
+        include "../app/views/task/edit.php"; 
         include "../app/views/layout/footer.php";
     }
 
@@ -109,6 +112,9 @@ class TaskController {
                 ':deadline' => $_POST['deadline'],
                 ':progress' => $_POST['progress_percent']
             ]);
+            
+            // --- REFRESH M-VIEW SETELAH UPDATE ---
+            $this->project->refreshMView(); 
 
             header("Location: index.php?page=tasks");
 
@@ -124,6 +130,9 @@ class TaskController {
             // Soft Delete (Isi deleted_at)
             $stmt = $this->db->prepare("UPDATE tugas SET deleted_at = NOW() WHERE id_tugas = :id");
             $stmt->execute([':id' => $id]);
+            
+            // --- REFRESH M-VIEW SETELAH DELETE ---
+            $this->project->refreshMView(); 
             
             header("Location: index.php?page=tasks");
         } catch (PDOException $e) {

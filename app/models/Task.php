@@ -56,29 +56,19 @@ class Task {
      * PERBAIKAN: Menambahkan JOIN ke anggota_tim dan status
      */
     public function all($keyword = null) {
-        try {
-            // Kita SELECT nama_anggota dan nama_status agar View tidak menampilkan "Belum Ditugaskan"
-            $sql = "SELECT t.*, 
-                           p.nama_proyek, 
-                           a.nama AS nama_anggota, 
-                           s.nama_status
-                    FROM " . $this->table_name . " t 
-                    JOIN proyek p ON p.id_proyek = t.id_proyek
-                    LEFT JOIN anggota_tim a ON t.id_anggota = a.id_anggota
-                    LEFT JOIN status s ON t.id_status = s.id_status
-                    WHERE t.deleted_at IS NULL";
-            
-            // Logika Pencarian
-            if ($keyword) {
-                // ILIKE untuk case-insensitive di PostgreSQL
-                // Filter berdasarkan Nama Tugas, Proyek, atau Anggota Tim
-                $sql .= " AND (t.nama_tugas ILIKE :keyword 
-                               OR p.nama_proyek ILIKE :keyword 
-                               OR a.nama ILIKE :keyword)";
-            }
+    try {
+        // Query disederhanakan menggunakan VIEW
+        $sql = "SELECT * FROM v_detail_tugas 
+                WHERE deleted_at IS NULL";
+        
+        if ($keyword) {
+            $sql .= " AND (nama_tugas ILIKE :keyword 
+                           OR nama_proyek ILIKE :keyword 
+                           OR nama_anggota ILIKE :keyword)";
+        }
 
-            // Urutkan berdasarkan deadline terdekat, lalu status, lalu nama
-            $sql .= " ORDER BY t.deadline ASC, t.id_tugas DESC";
+        // Urutkan berdasarkan deadline terdekat, lalu status, lalu nama
+        $sql .= " ORDER BY deadline ASC, id_tugas DESC";
             
             $stmt = $this->conn->prepare($sql);
 
@@ -99,12 +89,23 @@ class Task {
 
     public function create($data) {
         try {
+            // 1. Mulai Transaksi
+            $this->conn->beginTransaction();
+
             $sql = "INSERT INTO " . $this->table_name . " (nama_tugas, id_proyek, id_anggota, id_status, deadline, progress_percent, created_at)
                     VALUES (:nama, :proyek, :anggota, :status, :deadline, 0, NOW())";
+            
             $stmt = $this->conn->prepare($sql);
-            return $stmt->execute($data);
+            $stmt->execute($data);
+
+            // 2. Jika sukses, simpan permanen (Commit)
+            $this->conn->commit();
+            return true;
+
         } catch (PDOException $e) {
-            error_log("Error creating task: " . $e->getMessage());
+            // 3. Jika gagal, batalkan perubahan (Rollback)
+            $this->conn->rollBack();
+            error_log("Error creating task with transaction: " . $e->getMessage());
             return false;
         }
     }

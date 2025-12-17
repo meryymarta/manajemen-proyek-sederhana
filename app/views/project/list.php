@@ -1,28 +1,20 @@
-<!-- Pastikan file ini berada di dalam layout utama -->
-
 <div class="content">
     
     <h1 style="margin-bottom: 20px;">Daftar Proyek</h1>
     
-    <!-- CONTAINER TOMBOL & SEARCH (Agar sejajar) -->
-    <!-- Saya menambahkan display: flex agar tombol di kiri dan search di kanan -->
     <div style="margin-bottom: 25px; display: flex; align-items: center; flex-wrap: wrap; gap: 15px;">
         
-        <!-- Tombol Tambah (Biru) -->
         <a href="index.php?page=project_create" 
            class="btn btn-add-project" 
            style="display: inline-block; background: linear-gradient(135deg, #4A8BFF, #3A6FE0); color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; box-shadow: 0 4px 6px rgba(74, 139, 255, 0.2);">
             + Tambah Proyek Baru
         </a>
 
-        <!-- TOMBOL: LIHAT ARSIP (Putih/Abu) -->
         <a href="index.php?page=project_archived" 
            style="display: inline-block; background: #fff; color: #64748b; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; border: 1px solid #cbd5e1; transition: 0.2s;">
             📂 Lihat Arsip / Sampah
         </a>
 
-        <!-- FORM PENCARIAN (BARU) -->
-        <!-- margin-left: auto berfungsi mendorong form ini ke sisi paling kanan -->
         <form method="GET" action="index.php" style="display: flex; gap: 10px; margin-left: auto;">
             <input type="hidden" name="page" value="projects">
             
@@ -53,6 +45,8 @@
                     <tr>
                         <th>Nama Proyek</th>
                         <th>Budget</th>
+                        <th>Total Tugas</th>
+                        <th>Selesai</th>
                         <th>Tgl Mulai</th>
                         <th>Tgl Selesai</th>
                         <th>Status Progress</th>
@@ -64,7 +58,6 @@
                     <?php if (!empty($projects)): ?>
                         <?php foreach ($projects as $row): ?>
                             <tr>
-                                <!-- Nama Proyek -->
                                 <td style="font-weight: 600; color: #2d3436;">
                                     <?= htmlspecialchars($row['nama_proyek']) ?>
                                     <?php if(isset($row['id_klien'])): ?>
@@ -72,16 +65,19 @@
                                     <?php endif; ?>
                                 </td>
                                 
-                                <!-- Budget -->
                                 <td>
                                     Rp <?= number_format($row['budget'], 0, ',', '.') ?>
                                 </td>
-                                
-                                <!-- Tanggal -->
+
+                                <td style="text-align: center; font-weight: bold;">
+                                    <?= htmlspecialchars($row['total_tugas'] ?? 0) ?>
+                                </td>
+                                <td style="text-align: center; font-weight: bold; color: #10b981;">
+                                    <?= htmlspecialchars($row['tugas_selesai'] ?? 0) ?>
+                                </td>
                                 <td><?= date('d M Y', strtotime($row['tanggal_mulai'])) ?></td>
                                 <td><?= date('d M Y', strtotime($row['tanggal_selesai'])) ?></td>
                                 
-                                <!-- Status Progress (Bar) -->
                                 <td>
                                     <?php $prog = floatval($row['progress'] ?? 0); ?>
                                     <div class="progress-bar-bg" style="background: #e2e8f0; height: 8px; border-radius: 4px; overflow: hidden; width: 100%; margin-bottom: 5px;">
@@ -90,14 +86,12 @@
                                     <small style="font-weight: bold; color: #3b82f6;"><?= $prog ?>%</small>
                                 </td>
                                 
-                                <!-- Penanggung Jawab (Nama) -->
                                 <td>
                                     <span style="background: #eef2ff; color: #4f46e5; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;">
                                         <?= htmlspecialchars($row['nama_pj'] ?? 'Belum Ditunjuk') ?>
                                     </span>
                                 </td>
                                 
-                                <!-- Aksi (Tombol Kecil) -->
                                 <td style="text-align: center;">
                                     <div style="display: flex; gap: 8px; justify-content: center;">
                                         <a href="index.php?page=project_edit&id=<?= $row['id_proyek'] ?>" 
@@ -115,7 +109,7 @@
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="7" style="text-align: center; padding: 40px; color: #999;">
+                            <td colspan="9" style="text-align: center; padding: 40px; color: #999;">
                                 <?php if(isset($_GET['search'])): ?>
                                     Proyek dengan kata kunci "<b><?= htmlspecialchars($_GET['search']) ?></b>" tidak ditemukan.
                                 <?php else: ?>

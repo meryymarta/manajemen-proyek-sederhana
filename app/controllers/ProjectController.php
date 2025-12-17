@@ -9,10 +9,10 @@ class ProjectController {
     }
 
     public function index() {
-        // PERBAIKAN: Menangkap keyword pencarian dari URL
+        // Menangkap keyword pencarian dari URL
         $keyword = isset($_GET['search']) ? $_GET['search'] : null;
-
-        // Kirim keyword ke model (fungsi all sudah dimodifikasi sebelumnya untuk menerima parameter)
+        
+        // Kirim keyword ke model
         $projects = $this->project->all($keyword);
 
         include "../app/views/layout/header.php";
@@ -21,7 +21,7 @@ class ProjectController {
     }
 
     public function create() {
-        // Ambil Data untuk Dropdown
+        // Ambil Data untuk Dropdown (Query Asli)
         $stmt = $this->db->query("SELECT * FROM klien ORDER BY nama_klien ASC");
         $clients = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -37,10 +37,12 @@ class ProjectController {
     }
 
     public function store() {
-        // 1. Ambil Inputan
+        // 1. Ambil Inputan Dasar
         $mulai = $_POST['tanggal_mulai'];
         $selesai = $_POST['tanggal_selesai'];
-        $budget = $_POST['budget'];
+        
+        // [PERBAIKAN] Amankan Budget: Jika kosong, set jadi 0
+        $budget = !empty($_POST['budget']) ? $_POST['budget'] : 0;
 
         // 2. VALIDASI TANGGAL
         if (strtotime($selesai) < strtotime($mulai)) {
@@ -55,19 +57,28 @@ class ProjectController {
             return;
         }
 
+        // [PERBAIKAN UTAMA] Logika NULL Check
+        // Jika form kosong (""), ubah menjadi NULL agar database mau menerimanya.
+        $id_tim = !empty($_POST['id_tim']) ? $_POST['id_tim'] : null;
+        $id_pj  = !empty($_POST['penanggung_jawab']) ? $_POST['penanggung_jawab'] : null;
+
         // 4. Data Siap Simpan
         $data = [
-            'nama' => $_POST['nama_proyek'],
+            'nama'      => $_POST['nama_proyek'],
             'deskripsi' => $_POST['deskripsi'],
-            'mulai' => $mulai,
-            'selesai' => $selesai,
-            'klien' => $_POST['id_klien'],
-            'tim' => $_POST['id_tim'],
-            'budget' => $budget,
-            'pj' => $_POST['penanggung_jawab']
+            'mulai'     => $mulai,
+            'selesai'   => $selesai,
+            'klien'     => $_POST['id_klien'],
+            
+            'tim'       => $id_tim, // Menggunakan variabel yang sudah dicek NULL-nya
+            'budget'    => $budget,
+            'pj'        => $id_pj   // Menggunakan variabel yang sudah dicek NULL-nya
         ];
 
         if ($this->project->create($data)) {
+            // --- REFRESH M-VIEW SETELAH CREATE SUKSES ---
+            $this->project->refreshMView(); 
+            
             header("Location: index.php?page=projects");
         } else {
             header("Location: index.php?page=project_create&error=" . urlencode("Gagal menyimpan data"));
@@ -78,6 +89,7 @@ class ProjectController {
         $id = $_GET["id"];
         $project = $this->project->find($id);
 
+        // Ambil Data untuk Dropdown (Query Asli)
         $stmt = $this->db->query("SELECT * FROM klien ORDER BY nama_klien ASC");
         $clients = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -96,11 +108,18 @@ class ProjectController {
         $id = $_POST['id_proyek'] ?? $_GET['id']; 
         $mulai = $_POST['tanggal_mulai'];
         $selesai = $_POST['tanggal_selesai'];
+        
+        // [PERBAIKAN] Amankan Budget di Update
+        $budget = !empty($_POST['budget']) ? $_POST['budget'] : 0;
 
         if (strtotime($selesai) < strtotime($mulai)) {
             header("Location: index.php?page=project_edit&id=$id&error=" . urlencode("Tanggal selesai tidak valid!"));
             return;
         }
+
+        // [PERBAIKAN UTAMA] Logika NULL Check untuk Update juga
+        $id_tim = !empty($_POST['id_tim']) ? $_POST['id_tim'] : null;
+        $id_pj  = !empty($_POST['penanggung_jawab']) ? $_POST['penanggung_jawab'] : null;
 
         $data = [
             'id' => $id,
@@ -109,12 +128,16 @@ class ProjectController {
             'mulai' => $mulai,
             'selesai' => $selesai,
             'klien' => $_POST['id_klien'],
-            'tim' => $_POST['id_tim'],
-            'budget' => $_POST['budget'],
-            'pj' => $_POST['penanggung_jawab']
+            
+            'tim' => $id_tim,       // Menggunakan variabel aman
+            'budget' => $budget,    // Menggunakan variabel aman
+            'pj' => $id_pj          // Menggunakan variabel aman
         ];
 
         if ($this->project->update($data)) {
+            // --- REFRESH M-VIEW SETELAH UPDATE SUKSES ---
+            $this->project->refreshMView();
+            
             header("Location: index.php?page=projects");
         } else {
             header("Location: index.php?page=project_edit&id=$id&error=" . urlencode("Gagal mengupdate proyek"));
@@ -125,17 +148,17 @@ class ProjectController {
     public function archive() {
         $id = $_GET['id'];
         if ($this->project->archive($id)) {
+            // --- REFRESH M-VIEW SETELAH ARSIP SUKSES ---
+            $this->project->refreshMView();
+            
             header("Location: index.php?page=projects");
         } else {
             header("Location: index.php?page=projects&error=" . urlencode("Gagal mengarsipkan proyek"));
         }
     }
 
-    // --- TAMBAHAN YANG HILANG (PENTING!) ---
-
-    // 1. Fungsi untuk Menampilkan Halaman Arsip
+    // Fungsi untuk Menampilkan Halaman Arsip
     public function archived() {
-        // Ambil data sampah dari Model
         $projects = $this->project->getArchived();
 
         include "../app/views/layout/header.php";
@@ -143,11 +166,13 @@ class ProjectController {
         include "../app/views/layout/footer.php";
     }
 
-    // 2. Fungsi untuk Memulihkan Data (Restore)
+    // Fungsi untuk Memulihkan Data (Restore)
     public function restore() {
         $id = $_GET['id'];
-        // Panggil fungsi restore di Model
         if ($this->project->restore($id)) {
+            // --- REFRESH M-VIEW SETELAH RESTORE SUKSES ---
+            $this->project->refreshMView();
+            
             header("Location: index.php?page=projects");
         } else {
             header("Location: index.php?page=project_archived&error=" . urlencode("Gagal memulihkan proyek"));
