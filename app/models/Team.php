@@ -62,13 +62,24 @@ class Team {
     // --- CREATE ---
     public function create($data) {
         try {
+            // 1. Mulai Transaksi
+            $this->conn->beginTransaction();
+
             $sql = "INSERT INTO " . $this->table_name . " (nama_tim, deskripsi) VALUES (:nama, :deskripsi)";
             $stmt = $this->conn->prepare($sql);
-            return $stmt->execute([
+            $stmt->execute([
                 ':nama'      => $data['nama'],
                 ':deskripsi' => $data['deskripsi']
             ]);
+
+            // 2. Jika sukses, simpan permanen (Commit)
+            $this->conn->commit();
+            return true;
+
         } catch (PDOException $e) {
+            // 3. Jika gagal, batalkan perubahan (Rollback)
+            $this->conn->rollBack();
+            error_log("Error creating team with transaction: " . $e->getMessage());
             return false;
         }
     }
